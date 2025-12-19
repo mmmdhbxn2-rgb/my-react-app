@@ -1,0 +1,38 @@
+name: Next.js Build and Deploy
+
+on:
+  push:
+    branches: 
+      - 'release/version-*'  # release/version-で始まるブランチのみ
+  pull_request:
+    branches: 
+      - 'release/version-*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build Next.js
+        run: npm run build
+      
+      - name: Export static files
+        run: npm run export || echo "Export step skipped (using default build)"
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextjs-build
+          path: |
+            .next
+            out
